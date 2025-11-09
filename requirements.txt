@@ -1,0 +1,12 @@
+# --- Core dependencies for Streamlit wine dashboard ---
+streamlit>=1.30
+pandas>=2.0
+plotly>=5.15
+
+# --- Optional but recommended for styling & visuals ---
+seaborn>=0.13
+matplotlib>=3.7
+numpy>=1.24
+
+# --- Optional for online data fetching ---
+requests>=2.31
