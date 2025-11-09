@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import os
+import plotly.express as px
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="🍷 Taste Harmony", layout="wide")
@@ -17,84 +17,73 @@ def load_data():
 
 df = load_data()
 
-# --- DETECT WINE COLUMN ---
-wine_col = None
-for c in df.columns:
-    if "wine" in c.lower():
-        wine_col = c
-        break
+# --- DETECT WINE & FOOD COLUMN ---
+wine_col = next((c for c in df.columns if "wine" in c.lower()), None)
+food_col = next((c for c in df.columns if "food" in c.lower()), None)
 
-if not wine_col:
-    st.error("Kolom yang mengandung 'wine' tidak ditemukan di dataset.")
+if not wine_col or not food_col:
+    st.error("Required columns 'wine' or 'food' not found in the dataset.")
     st.stop()
 
-# --- DETECT FOOD COLUMN ---
-food_col = None
-for c in df.columns:
-    if "food" in c.lower():
-        food_col = c
-        break
-
-if not food_col:
-    st.error("Kolom yang mengandung 'food' tidak ditemukan di dataset.")
-    st.stop()
-
-# --- SIDEBAR ---
+# --- SIDEBAR HEADER ---
 st.sidebar.markdown(
-    "<h1 style='color:#AA8287; text-align:left;'>🍷 Taste Harmony</h1>",
+    """
+    <div style='
+        background-color:#F7EDE2;
+        padding:15px;
+        border-radius:10px;
+        text-align:center;
+        margin-bottom:10px;
+    '>
+        <h1 style='color:#AA8287; margin-bottom:5px;'>🍷 Taste Harmony</h1>
+        <p style='font-size:12px; color:#AA8287; margin-top:0;'>
+        Explore how wines complement various foods. Find your perfect pairing!
+        </p>
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
-st.sidebar.markdown(
-    """
-    <p style='font-size:13px; color:#AA8287; text-align:justify; margin-top:-10px;'>
-    Helps you explore how different wines complement various foods. Whether you're a wine enthusiast or a foodie, discover perfect pairings and enhance your dining experience!
-    </p>
-    <hr style='border:1px solid #E0E0E0;'>
-    """,
-    unsafe_allow_html=True,
-)
-
+# --- SIDEBAR MENU ---
 menu = st.sidebar.radio(
     "Navigate",
     ["Overview", "Pairing Explorer"],
     label_visibility="collapsed"
 )
 
+# --- SIDEBAR FILTER (EXPANDER) ---
+with st.sidebar.expander("Filter Wine 🍷", expanded=True):
+    wine_list = ["All"] + sorted(df[wine_col].dropna().unique().tolist())
+    selected_wine = st.selectbox("Select Wine Type", wine_list)
 
-# --- FILTER ---
-wine_list = ["All"] + sorted(df[wine_col].dropna().unique().tolist())
-selected_wine = st.sidebar.selectbox("Select Wine Type 🍷", wine_list)
-
+# --- FILTER DATA ---
 if selected_wine != "All":
     df_filtered = df[df[wine_col] == selected_wine]
 else:
     df_filtered = df.copy()
 
-# Spacer container
-spacer = st.sidebar.empty()
-
-# Footer sidebar
+# --- SIDEBAR FOOTER (STICKY) ---
 st.sidebar.markdown(
     """
     <div style="
         position: fixed;
         bottom: 0;
-        width: 15rem;  /* sesuaikan lebar sidebar */
-        text-align: left;
-        padding: 10px;
-        background-color: #f1f1f1;
+        width: 18rem;
+        text-align: center;
+        padding: 12px;
+        background-color: #F7EDE2;
+        border-radius:10px;
         color: #555;
         font-size: 10px;
     ">
-        © 2025 Wine & Food Pairing Analysis - by Lidya 
+        © 2025 Wine & Food Pairing Analysis - by Lidya
     </div>
     """,
     unsafe_allow_html=True
 )
 
 # --- PAGE CONTENT ---
-if menu == "Overview":
+if menu == "Overview" and selected_wine == "All":
     st.markdown("<h2 style='color:#AA8287;'>🍇 Overview</h2>", unsafe_allow_html=True)
     st.write(
         "Discover how different wines complement various foods. "
@@ -109,53 +98,66 @@ if menu == "Overview":
 
     st.write("---")
 
-    # Top 3 Pairings (overall)
-    st.subheader("🍾 Top 3 Food Pairings (All Wines)")
-    top3_overall = (
-        df[food_col].value_counts().head(3).reset_index()
+# --- TOP 3 FOOD PAIRINGS ---
+st.subheader("🍾 Top 3 Food Pairings")
+top3 = df_filtered[food_col].value_counts().head(3).reset_index()
+top3.columns = ["Food", "Count"]
+
+cols = st.columns(len(top3))
+for i, row in enumerate(top3.itertuples()):
+    with cols[i]:
+        st.metric(f"#{i+1} {row.Food}", f"{row.Count} pairings")
+
+# --- HORIZONTAL BAR CHART DOMINAN FOOD PER WINE ---
+top_food = df_filtered[food_col].value_counts().reset_index()
+top_food.columns = ["Food", "Count"]
+
+fig = px.bar(
+    top_food,
+    x="Count",
+    y="Food",
+    orientation="h",
+    color="Count",
+    text="Count",
+    color_continuous_scale="Reds",
+)
+
+fig.update_layout(
+    yaxis={'categoryorder':'total ascending'},
+    xaxis_title="Number of Pairings",
+    yaxis_title="Food",
+    showlegend=False,
+)
+
+st.plotly_chart(fig, use_container_width=True)
+
+# --- STACKED BAR CHART ALL WINE VS FOOD ---
+if selected_wine == "All":
+    st.subheader("🍷 Wine vs Food Pairing Comparison")
+    pivot = df.pivot_table(
+        index=food_col,
+        columns=wine_col,
+        aggfunc='size',
+        fill_value=0
     )
-    top3_overall.columns = ["Food", "Count"]
 
-    cols = st.columns(3)
-    for i, row in enumerate(top3_overall.itertuples()):
-        with cols[i]:
-            st.metric(f"#{i+1} {row.Food}", f"{row.Count} pairings")
-
-elif menu == "Pairing Explorer":
-    st.markdown("<h2 style='color:#AA8287;'>🍽️ Pairing Explorer</h2>", unsafe_allow_html=True)
-
-     # Chart
-    fig = px.histogram(
-        df_filtered,
-        x=food_col,
-        color=wine_col,
-        title=f"Food Pairing Distribution for {selected_wine if selected_wine != 'All' else 'All Wines'}",
+    fig2 = px.bar(
+        pivot,
+        x=pivot.index,
+        y=pivot.columns,
         text_auto=True
     )
-    fig.update_layout(
-        template="plotly_white",
-        title_font_color="#AA8287",
-        font_color="#333",
-        bargap=0.3
+    fig2.update_layout(
+        xaxis_title="Food",
+        yaxis_title="Count",
+        barmode="stack",
+        legend_title="Wine"
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig2, use_container_width=True)
 
-    # --- TOP 3 SUMMARY ---
-    st.subheader("🍾 Top 3 Food Pairings")
-
-    # Revisi: pastikan nama kolom sesuai
-    top3 = (
-        df_filtered[food_col]
-        .value_counts()
-        .head(3)
-        .reset_index()
+# --- CAPTION ONLY FOR OVERALL ---
+if selected_wine == "All":
+    st.markdown(
+        "<p style='font-size:10px; color:#AA8287; text-align:center;'>Note: The longer the bar, the more frequently that type of wine is paired with the food.</p>",
+        unsafe_allow_html=True
     )
-    top3.columns = ["Food", "Count"] 
-
-    if not top3.empty:
-        cols = st.columns(len(top3))
-        for i, row in enumerate(top3.itertuples()):
-            with cols[i]:
-                st.metric(f"#{i+1} {row.Food}", f"{row.Count} pairings")
-    else:
-        st.info("No data available for this selection.")
