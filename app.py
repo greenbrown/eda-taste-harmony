@@ -68,7 +68,7 @@ st.sidebar.markdown(
     <div style="
         position: fixed;
         bottom: 0;
-        width: 18rem;
+        width: 15rem;
         text-align: center;
         padding: 12px;
         background-color: #F7EDE2;
