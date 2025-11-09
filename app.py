@@ -87,7 +87,7 @@ st.sidebar.markdown(
         color: #555;
         font-size: 14px;
     ">
-        © 2025 Love Wine Analytics 
+        © 2025 Wine & Food Pairing Analysis - by Lidya 
     </div>
     """,
     unsafe_allow_html=True
@@ -150,7 +150,7 @@ elif menu == "Pairing Explorer":
         .head(3)
         .reset_index()
     )
-    top3.columns = ["Food", "Count"]  # pastikan kolom benar
+    top3.columns = ["Food", "Count"] 
 
     if not top3.empty:
         cols = st.columns(len(top3))
