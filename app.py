@@ -70,7 +70,7 @@ st.sidebar.markdown(
         bottom: 0;
         width: 12rem;
         text-align: center;
-        padding: 12px;
+        padding: 13px;
         background-color: #F7EDE2;
         border-radius:10px;
         color: #555;
