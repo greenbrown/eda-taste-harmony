@@ -81,11 +81,11 @@ st.sidebar.markdown(
         position: fixed;
         bottom: 0;
         width: 15rem;  /* sesuaikan lebar sidebar */
-        text-align: center;
+        text-align: left;
         padding: 10px;
         background-color: #f1f1f1;
         color: #555;
-        font-size: 14px;
+        font-size: 10px;
     ">
         © 2025 Wine & Food Pairing Analysis - by Lidya 
     </div>
