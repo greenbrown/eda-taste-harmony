@@ -62,17 +62,12 @@ if selected_wine != "All":
 else:
     df_filtered = df.copy()
 
-# --- SIDEBAR FOOTER (STICKY) ---
+## --- SIDEBAR FOOTER FLEXIBLE ---
 st.sidebar.markdown(
     """
     <div style="
-        position: fixed;
-        bottom: 0;
-        width: 12rem;
+        margin-top: 50px;  /* ruang agar footer muncul di bawah semua elemen */
         text-align: center;
-        padding: 13px;
-        background-color: #F7EDE2;
-        border-radius:10px;
         color: #555;
         font-size: 10px;
     ">
@@ -81,6 +76,7 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # --- PAGE CONTENT ---
 if menu == "Overview" and selected_wine == "All":
