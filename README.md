@@ -19,10 +19,8 @@ pairings, and top 3 insights based on selected filters.
 
 ### Streamlit App
 
--   Filters:
-    -   Country
-    -   Variety
-    -   Price range
+[https://wine-taste-harmony.streamlit.app/](https://wine-taste-harmony.streamlit.app/)
+-   Filters: Wine 
 -   Interactive visualizations using Plotly
 -   Automatic Top 3 Insight Summary based on active filters
 -   Clean sidebar layout with static footer
