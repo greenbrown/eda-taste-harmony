@@ -71,7 +71,7 @@ st.sidebar.markdown(
         color: #555;
         font-size: 10px;
     ">
-        © 2025 Wine & Food Pairing Analysis - by Lidya
+        © 2025 Wine & Food Pairing Analysis
     </div>
     """,
     unsafe_allow_html=True
